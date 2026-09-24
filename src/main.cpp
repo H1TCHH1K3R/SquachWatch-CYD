@@ -436,7 +436,18 @@ static void drawCrashCard(TFT_eSPI& t) {
 #define TOUCH_IRQ  36
 #define CAP_SDA    33
 #define CAP_SCL    32
+#if defined(NICEMCU)
+// This board's touch reset is the SAME physical line as the panel's
+// TFT_RST (GPIO2, see nicemcu_user_setup.h) -- tft.init() already
+// pulses it before this runs. A second reset pulse here would have to
+// land on some other pin, and the only candidate (GPIO25) is this
+// board's actual backlight, not a spare -- so skip it rather than
+// guess. CapTouch::begin() treats rst<0 as "no reset line to drive",
+// same as the T-Watch's FT6336 below.
+#define CAP_RST    -1
+#else
 #define CAP_RST    25
+#endif
 // Backlight brightness (Settings menu): all three boards' backlight
 // pins are driven at boot regardless of which one is actually wired
 // (see the digitalWrite(HIGH) comment in setup() — same reasoning
@@ -448,9 +459,11 @@ static void drawCrashCard(TFT_eSPI& t) {
 #define BL_PIN_CAP  27
 #define BL_PIN_AWOK 32
 #define BL_PIN_TWATCH 45
+#define BL_PIN_NICEMCU 25
 #define BL_CH_ORIG  0
 #define BL_CH_CAP   1
 #define BL_CH_AWOK  2
+#define BL_CH_NICEMCU 3
 
 // invertDisplay() sets an ABSOLUTE panel state -- it doesn't toggle
 // relative to whatever TFT_INVERSION_ON/OFF a board's user-setup header
@@ -949,6 +962,9 @@ static void applyBrightness() {
     ledcWrite(BL_CH_ORIG, duty);
     ledcWrite(BL_CH_CAP,  duty);
     ledcWrite(BL_CH_AWOK, duty);
+#if defined(NICEMCU)
+    ledcWrite(BL_CH_NICEMCU, duty);
+#endif
 }
 
 // 240, 160 or 80 MHz. Never lower: the radio needs an 80 MHz APB clock, and
@@ -2410,6 +2426,9 @@ void setup() {
 #else
     pinMode(27, OUTPUT); digitalWrite(27, HIGH);
     pinMode(32, OUTPUT); digitalWrite(32, HIGH);  // AWOK's real BL pin; unused GPIO on the other two boards
+#if defined(NICEMCU)
+    pinMode(25, OUTPUT); digitalWrite(25, HIGH);  // NiceMCU's real BL pin
+#endif
 #endif
 
     tft.init();
@@ -2478,6 +2497,10 @@ void setup() {
     ledcAttachPin(BL_PIN_CAP, BL_CH_CAP);
     ledcSetup(BL_CH_AWOK, 5000, 8);
     ledcAttachPin(BL_PIN_AWOK, BL_CH_AWOK);
+#if defined(NICEMCU)
+    ledcSetup(BL_CH_NICEMCU, 5000, 8);
+    ledcAttachPin(BL_PIN_NICEMCU, BL_CH_NICEMCU);
+#endif
 #endif
     applyBrightness();
     // A saved core clock has to be restored here too, or the setting silently
@@ -2508,6 +2531,9 @@ void setup() {
         ledcWrite(BL_CH_ORIG, 24);
         ledcWrite(BL_CH_CAP,  24);
         ledcWrite(BL_CH_AWOK, 24);
+#if defined(NICEMCU)
+        ledcWrite(BL_CH_NICEMCU, 24);
+#endif
         tft.fillScreen(Theme::BG);
         tft.setTextSize(1);
         tft.setTextWrap(false);
@@ -2713,6 +2739,9 @@ void setup() {
     ledcWrite(BL_CH_ORIG, 24);
     ledcWrite(BL_CH_CAP,  24);
     ledcWrite(BL_CH_AWOK, 24);
+#if defined(NICEMCU)
+    ledcWrite(BL_CH_NICEMCU, 24);
+#endif
 
     // The black box, before the radios: this boot's record -- with the crash
     // in it when there was one -- then the log as the last boot left it, so
