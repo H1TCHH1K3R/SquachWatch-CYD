@@ -1,7 +1,9 @@
 # SquachWatch-CYD
 
 > Surveillance-device detector for the ESP32-2432S028R ("Cheap Yellow Display").
-> This fork supports the NiceMCU-32S-DEV 2.8IPS (instructions below under "Hardware")
+
+This fork supports the NiceMCU-32S-DEV 2.8IPS (instructions are below under "Hardware")
+Board available at: https://link.amazon/B03SSRK5s
 
 SquachWatch-CYD sniffs the 2.4 GHz airwaves for known wireless signatures
 of Flock Safety cameras, Axon body cameras, recording glasses, card
@@ -71,6 +73,7 @@ otherwise see all week. It is one tap away in `DETECTION FILTER`.
 ## Hardware
 
 - **NiceMCU-32S-DEV 2.8IPS** (for this fork)
+- Board is https://link.amazon/B03SSRK5s - 2.8 inch ESP32 Capacitive Touchscreen TFT LCD Display XH-32S Board from DIYMall
 This fork supports the NiceMCU-32S-DEV_2.8IPS board with the SparkleIOT XH-32S module. It uses a 240×320 ST7789 display and capacitive touch.
 
 Select the `cyd-nicemcu` PlatformIO environment to build and flash it:
